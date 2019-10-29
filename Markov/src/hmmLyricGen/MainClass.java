@@ -23,7 +23,7 @@ public class MainClass {
 		HashMap<String, List<String>> secondWords = new HashMap<String, List<String>>(); 
 		
 		
-		HashMap< String[], List<String>> transitions = new HashMap< String[], List<String>>(); 
+		HashMap< String, List<String>> transitions = new HashMap< String, List<String>>(); 
 		
 		
 
@@ -36,16 +36,23 @@ public class MainClass {
 		String token_t_minus_1;  
 		String token_t;  
 		String[] t_2_t_1 = new String[2]; //[t_minus_2, t_minus_1] this is first parameter in transitions hash
+		String t2t1; //concatenated t-2 and t-1 separated by underscore
 		
 		List<String> secondWords_vals_list = new ArrayList<String>(); 
 		List<String> transitions_vals_list = new ArrayList<String>();
 		List<String> temp_seconds = new ArrayList<String>();
 		List<String> temp_transitions = new ArrayList<String>();
 		
+		int firstWord_count = 0;
+		int secondWord_count = 0;
+		
 		while( true ) {
 			try {
 				String line = sc.nextLine();
 				String[] splits = line.split("\\s+");
+				
+				if (splits.length > 0)
+					firstWord_count++; //newline with at least one word
 				
 				
 				//get/put beginning of line into firstWords dictionary
@@ -62,11 +69,13 @@ public class MainClass {
 					temp_seconds = secondWords.get(splits[0]);
 					temp_seconds.add(splits[1]);
 					secondWords.put(splits[0], temp_seconds);
+					secondWord_count++;
 				}
 				if(splits.length > 1 && 
 					!secondWords.containsKey(splits[0])) {
 				
 					secondWords.put(splits[0], new ArrayList<String>(Arrays.asList(splits[1])));
+					secondWord_count++;
 				}
 					
 				
@@ -80,17 +89,18 @@ public class MainClass {
 						t_2_t_1[0] = token_t_minus_2;
 						t_2_t_1[1] = token_t_minus_1;
 						
+						t2t1 = token_t_minus_2 + "_" + token_t_minus_1; 
 						
 						//associate t with word pair [t-2, t-1] :
-						if(transitions.containsKey(t_2_t_1)) {
+						if(transitions.containsKey(t2t1)) {
 							
-							temp_transitions = transitions.get(t_2_t_1);
+							temp_transitions = transitions.get(t2t1);
 							temp_transitions.add(token_t);
-							transitions.put(t_2_t_1, temp_transitions);
+							transitions.put(t2t1, temp_transitions);
 							//System.out.println("IN IF");
 						}
 						else {
-							transitions.put(t_2_t_1, new ArrayList<String>(Arrays.asList(token_t)));	
+							transitions.put(t2t1, new ArrayList<String>(Arrays.asList(token_t)));	
 							//System.out.println("IN ELSE");
 						}
 							
@@ -100,13 +110,15 @@ public class MainClass {
 				t_2_t_1[0] = splits[splits.length-2]; 
 				t_2_t_1[1] = splits[splits.length-1];
 				
-				if(transitions.containsKey(t_2_t_1)) {
-					temp_transitions = transitions.get(t_2_t_1);
+				t2t1 = splits[splits.length-2] + "_" + splits[splits.length-1];
+				
+				if(transitions.containsKey(t2t1)) {
+					temp_transitions = transitions.get(t2t1);
 					temp_transitions.add(".");
-					transitions.put(t_2_t_1, temp_transitions);
+					transitions.put(t2t1, temp_transitions);
 				}
 				else
-					transitions.put(t_2_t_1, new ArrayList<String>(Arrays.asList(".")));						
+					transitions.put(t2t1, new ArrayList<String>(Arrays.asList(".")));						
 			}
 				
 				System.out.println(line + "\t" + count);
@@ -121,6 +133,19 @@ public class MainClass {
 			}
 		}
 		
+		
+		//normalize firstWords<>
+				
+				
+				for(String key_x: firstWords.keySet()) {
+					firstWords.put(key_x, firstWords.get(key_x)/firstWord_count);
+				}
+				
+				
+				for(String key_x: secondWords.keySet()) {
+					//firstWords.put(key_x, secondWords.get(key_x)/secondWord_count);
+				}
+				
 	
 		for(String firsts: firstWords.keySet()) {
 			String key = firsts.toString();
@@ -147,7 +172,7 @@ public class MainClass {
 		System.out.println(firstWords.size());
 		System.out.println(transitions.size());
 		System.out.println(transitions.toString());
-		
+		System.out.println(firstWord_count);
 		
 		
 		
