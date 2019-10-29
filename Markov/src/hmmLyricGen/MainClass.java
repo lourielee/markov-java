@@ -10,7 +10,6 @@ public class MainClass {
 		//read in word file
 		String infile = "childrens_song_lyrics.txt";
 		File openFile = new File(infile);
-		System.out.println(new File("childrens_song_lyrics.txt").getAbsolutePath());
 		Scanner sc = new Scanner(openFile);
 		
 		
@@ -97,11 +96,11 @@ public class MainClass {
 							temp_transitions = transitions.get(t2t1);
 							temp_transitions.add(token_t);
 							transitions.put(t2t1, temp_transitions);
-							//System.out.println("IN IF");
+							
 						}
 						else {
 							transitions.put(t2t1, new ArrayList<String>(Arrays.asList(token_t)));	
-							//System.out.println("IN ELSE");
+							
 						}
 							
 					}
@@ -121,7 +120,7 @@ public class MainClass {
 					transitions.put(t2t1, new ArrayList<String>(Arrays.asList(".")));						
 			}
 				
-				System.out.println(line + "\t" + count);
+			//	System.out.println(line + "\t" + count);
 				
 				count++;
 			}
@@ -141,12 +140,63 @@ public class MainClass {
 					firstWords.put(key_x, firstWords.get(key_x)/firstWord_count);
 				}
 				
-				
+				HashMap<String, HashMap<String, Double>> secondWords_stats = new HashMap<String, HashMap<String, Double>>();
 				for(String key_x: secondWords.keySet()) {
-					//firstWords.put(key_x, secondWords.get(key_x)/secondWord_count);
+					
+					List<String> val_words = new ArrayList<String>();
+					
+					val_words = secondWords.get(key_x);
+					int listLen = val_words.size();
+					
+					//secondWords_stats HashMap vals: <second words, probabilities>
+					HashMap<String, Double> val_words_prob = new HashMap<String, Double>();
+					double current_prob = 0;
+					for(String w : val_words) {
+						
+						if(val_words_prob.containsKey(w)) {
+							current_prob = val_words_prob.get(w) + ( 1 / listLen );
+							current_prob = current_prob + ( 1 / listLen );
+							val_words_prob.put(w, current_prob);	
+						}
+						else
+							val_words_prob.put(w, 1.0);
+						
+					}
+					secondWords_stats.put(key_x, val_words_prob);
+				}
+				
+				//transitions
+				HashMap<String, HashMap<String, Double>> transitions_stats = new HashMap<String, HashMap<String, Double>>();
+				for(String key_y: transitions.keySet()) {
+					
+					List<String> val_words = new ArrayList<String>();
+					
+					val_words = transitions.get(key_y);
+					int listLen = val_words.size();
+					
+					//transitions_stats HashMap vals: <second words, probabilities>
+					HashMap<String, Double> val_words_prob = new HashMap<String, Double>();
+					double current_prob = 0;
+					for(String w : val_words) {
+						
+						if(val_words_prob.containsKey(w)) {
+							current_prob = val_words_prob.get(w) + ( 1 / listLen );
+							current_prob = current_prob + ( 1 / listLen );
+							val_words_prob.put(w, current_prob);	
+						}
+						else
+							val_words_prob.put(w, 1.0);
+						
+					}
+					transitions_stats.put(key_y, val_words_prob);
 				}
 				
 	
+				
+				
+				
+		/*		
+				
 		for(String firsts: firstWords.keySet()) {
 			String key = firsts.toString();
 			String value = firstWords.get(firsts).toString();
@@ -174,7 +224,7 @@ public class MainClass {
 		System.out.println(transitions.toString());
 		System.out.println(firstWord_count);
 		
-		
+		*/
 		
 	}
 
