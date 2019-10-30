@@ -51,9 +51,9 @@ public class MainClass {
 				
 				String line = sc.nextLine();
 				String[] splits = line.split("\\s+");
+			if(splits.length > 2) {
 				
-				if (splits.length > 0)
-					firstWord_count++; //newline with at least one word
+					firstWord_count++; //newline with at least one word, skip lines with less than 3 words
 				
 				
 				//get/put beginning of line into firstWords dictionary
@@ -64,16 +64,15 @@ public class MainClass {
 				else
 					firstWords.put(splits[0], 1.0);
 				
+				
 				//get/put secondWords:
-				if(splits.length > 1 && 
-					secondWords.containsKey(splits[0])) {
+				if( secondWords.containsKey(splits[0])) {
 					temp_seconds = secondWords.get(splits[0]);
 					temp_seconds.add(splits[1]);
 					secondWords.put(splits[0], temp_seconds);
 					secondWord_count++;
 				}
-				if(splits.length > 1 && 
-					!secondWords.containsKey(splits[0])) {
+				if(!secondWords.containsKey(splits[0])) {
 				
 					secondWords.put(splits[0], new ArrayList<String>(Arrays.asList(splits[1])));
 					secondWord_count++;
@@ -82,7 +81,7 @@ public class MainClass {
 				
 				//get/put rest of words in line in transitions<>
 				// first iteration: splits[t-2, t-1, t,..., last word in line]
-				if(splits.length > 2) { 
+				//if(splits.length > 2) { 
 					for(int i = 1; i < splits.length -1 ; i++) {
 						token_t_minus_1 = splits[i];
 						token_t_minus_2 = splits[i -1];
@@ -103,9 +102,9 @@ public class MainClass {
 						else {
 							transitions.put(t2t1, new ArrayList<String>(Arrays.asList(token_t)));	
 							
-						}
+				}
 							
-					}
+			}
 				
 				//last word
 				t_2_t_1[0] = splits[splits.length-2]; 
@@ -117,16 +116,43 @@ public class MainClass {
 					temp_transitions = transitions.get(t2t1);
 					temp_transitions.add(".");
 					transitions.put(t2t1, temp_transitions);
-				}
+					}
 				else
 					transitions.put(t2t1, new ArrayList<String>(Arrays.asList(".")));						
-			}
+				//}
 				
 			//	System.out.println(line + "\t" + count);
 				
 				count++;
 			}
-				
+		}
+		
+		PrintWriter writer = new PrintWriter("check_seconds.txt", "UTF-8");
+		for(Map.Entry<String, List<String>> entry : secondWords.entrySet()) {
+			String key = entry.getKey().toString();
+			List<String> val = secondWords.get(key);
+			writer.println("\n");
+			writer.print(key + ": \t");
+			for(String strVal:val) {
+				writer.print(strVal + "\t");
+			}
+		}
+		writer.close();
+		
+		PrintWriter writer2 = new PrintWriter("check_trans.txt", "UTF-8");
+		for(Map.Entry<String, List<String>> entry2 : transitions.entrySet()) {
+			String key2 = entry2.getKey().toString();
+			List<String> val2 = transitions.get(key2);
+			writer2.println("\n");
+			writer2.print(key2 + ": \t");
+			for(String strVal2:val2) {
+				writer2.print(strVal2 + "\t");
+			}
+		}
+		writer2.close();
+		
+		
+		
 			
 		//normalize firstWords<>
 				
@@ -188,7 +214,7 @@ public class MainClass {
 				}
 				
 	
-				
+				PrintWriter writer3 = new PrintWriter("sentence.txt", "UTF-8");
 				//generate text using model:
 				
 				for(int i = 0; i < 10; i++) {
@@ -206,7 +232,8 @@ public class MainClass {
 						if(seed < x) {
 							sentence = firsts + " ";
 							word_one = firsts;
-							//System.out.println(word_one + "********");
+						//	System.out.println(word_one + "   *FIRST WORD*");
+							writer3.print(word_one + "^ ");
 							break;
 						}
 						//}
@@ -221,7 +248,8 @@ public class MainClass {
 						if(seed < x) {
 							sentence = sentence + " " + seconds + " ";
 							word_two = seconds;
-						//	System.out.println(word_two + "&&&&&&&&&&");
+						//	System.out.println(word_two + "   *SECOND WORD*");
+							writer3.print(word_two + "* ");
 							break;
 						}
 					}//second word generated
@@ -233,27 +261,32 @@ public class MainClass {
 						HashMap<String, Double> val_trans = transitions_stats.get(word_pair);
 						seed = Math.random();
 						x = 0.0;
+					//	System.out.println("Word Pair:  " + word_pair);
 						for(String trans: val_trans.keySet()) {
 							Double value = val_trans.get(trans);
 							x = x+value;
 							if(seed < x) {
 								sentence = sentence + " " + trans + " ";
 								next = trans;
-							//	System.out.println(next + "+++++++");
+						//		System.out.println(next + "   *NEXT WORD*");
+								writer3.print(next + "+ ");
 								break;
 							}
 						}//second word generated
 						word_pair = word_two + "_" + next;
 						word_two = next;
+						
 					}while(word_two != ".");
-					
+					writer3.println("");
 				System.out.println(sentence);
+				
 				}
+				writer3.close();
 		
 				
 				
 				
-				
+		/*	
 		for(String firsts: firstWords.keySet()) {
 			String key = firsts.toString();
 			String value = firstWords.get(firsts).toString();
@@ -283,7 +316,7 @@ public class MainClass {
 		System.out.println(firstWord_count);
 		
 		*/
-		System.out.println(transitions.size());
+		//System.out.println(transitions.size());
 		
 	}
 
