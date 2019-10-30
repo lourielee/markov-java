@@ -1,6 +1,7 @@
 package hmmLyricGen;
 
 import java.io.*;
+import java.lang.Math;
 import java.util.*;
 
 
@@ -8,7 +9,7 @@ public class MainClass {
 
 	public static void main(String[] args)throws Exception {
 		//read in word file
-		String infile = "childrens_song_lyrics.txt";
+		String infile = "childrens_song_lyrics_plus.txt";
 		File openFile = new File(infile);
 		Scanner sc = new Scanner(openFile);
 		
@@ -16,7 +17,7 @@ public class MainClass {
 		HashMap<String, Integer> wordCount = new HashMap<String, Integer>();
 		
 		//{first word newline, frequency} :
-		HashMap<String, Integer> firstWords = new HashMap<String, Integer>(); 
+		HashMap<String, Double> firstWords = new HashMap<String, Double>(); 
 		
 		//{unique newline words, words that immediately follow this newline word} :
 		HashMap<String, List<String>> secondWords = new HashMap<String, List<String>>(); 
@@ -45,8 +46,9 @@ public class MainClass {
 		int firstWord_count = 0;
 		int secondWord_count = 0;
 		
-		while( true ) {
-			try {
+	
+		while(sc.hasNextLine()) {
+				
 				String line = sc.nextLine();
 				String[] splits = line.split("\\s+");
 				
@@ -56,11 +58,11 @@ public class MainClass {
 				
 				//get/put beginning of line into firstWords dictionary
 				if(firstWords.containsKey(splits[0])) {
-					int currentFreq = firstWords.get(splits[0]);
+					double currentFreq = firstWords.get(splits[0]);
 					firstWords.put(splits[0], currentFreq+1);	
 				}
 				else
-					firstWords.put(splits[0], 1);
+					firstWords.put(splits[0], 1.0);
 				
 				//get/put secondWords:
 				if(splits.length > 1 && 
@@ -124,20 +126,14 @@ public class MainClass {
 				
 				count++;
 			}
-			catch(NoSuchElementException e) {
-				//output: number of lines in input file
-				System.out.println(e.getMessage() + "\t" + count);
-				break;
 				
-			}
-		}
-		
-		
+			
 		//normalize firstWords<>
 				
-				
+		
 				for(String key_x: firstWords.keySet()) {
 					firstWords.put(key_x, firstWords.get(key_x)/firstWord_count);
+					
 				}
 				
 				HashMap<String, HashMap<String, Double>> secondWords_stats = new HashMap<String, HashMap<String, Double>>();
@@ -193,15 +189,77 @@ public class MainClass {
 				
 	
 				
+				//generate text using model:
+				
+				for(int i = 0; i < 10; i++) {
+					String sentence = "ok";
+					String word_one = "";
+					String word_two = "";
+				//	System.out.println("HERE");
+					double seed = Math.random();
+					double x = 0.0;
+					for(String firsts: firstWords.keySet()) {
+						//while(seed > x) {
+						Double value = firstWords.get(firsts);
+						x = x+value;
+						
+						if(seed < x) {
+							sentence = firsts + " ";
+							word_one = firsts;
+							//System.out.println(word_one + "********");
+							break;
+						}
+						//}
+						//System.out.println("THERE*******");
+					}//first word generated
+					HashMap<String, Double> val = secondWords_stats.get(word_one);
+					seed = Math.random();
+					x = 0.0;
+					for(String seconds: val.keySet()) {
+						Double value = val.get(seconds);
+						x = x+value;
+						if(seed < x) {
+							sentence = sentence + " " + seconds + " ";
+							word_two = seconds;
+						//	System.out.println(word_two + "&&&&&&&&&&");
+							break;
+						}
+					}//second word generated
+					
+					String word_pair = word_one + "_" + word_two;
+					String previous = word_two;
+					String next = "";
+					do {
+						HashMap<String, Double> val_trans = transitions_stats.get(word_pair);
+						seed = Math.random();
+						x = 0.0;
+						for(String trans: val_trans.keySet()) {
+							Double value = val_trans.get(trans);
+							x = x+value;
+							if(seed < x) {
+								sentence = sentence + " " + trans + " ";
+								next = trans;
+							//	System.out.println(next + "+++++++");
+								break;
+							}
+						}//second word generated
+						word_pair = word_two + "_" + next;
+						word_two = next;
+					}while(word_two != ".");
+					
+				System.out.println(sentence);
+				}
+		
 				
 				
-		/*		
+				
 				
 		for(String firsts: firstWords.keySet()) {
 			String key = firsts.toString();
 			String value = firstWords.get(firsts).toString();
-			System.out.println(key + " " + value);
+			//System.out.println(key + " " + value);
 		}
+		/*
 		
 		int x = 0;
 		for(Map.Entry<String, List<String>> entry : secondWords.entrySet()) {
@@ -225,6 +283,7 @@ public class MainClass {
 		System.out.println(firstWord_count);
 		
 		*/
+		System.out.println(transitions.size());
 		
 	}
 
