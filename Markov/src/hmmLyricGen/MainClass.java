@@ -168,22 +168,37 @@ public class MainClass {
 					List<String> val_words = new ArrayList<String>();
 					
 					val_words = secondWords.get(key_x);
-					int listLen = val_words.size();
-					
+					double listLen = val_words.size();
 					//secondWords_stats HashMap vals: <second words, probabilities>
 					HashMap<String, Double> val_words_prob = new HashMap<String, Double>();
 					double current_prob = 0;
 					for(String w : val_words) {
 						
 						if(val_words_prob.containsKey(w)) {
-							current_prob = val_words_prob.get(w) + ( 1 / listLen );
-							current_prob = current_prob + ( 1 / listLen );
-							val_words_prob.put(w, current_prob);	
+							//current_prob = val_words_prob.get(w) + ( 1 / listLen );
+							//current_prob = current_prob + ( 1 / listLen );
+							//val_words_prob.put(w, current_prob);	
+							
+							
+							double currentFreq = val_words_prob.get(w);
+							val_words_prob.put(w, currentFreq+1);	
+						//	System.out.println(w + "\t*" + val_words_prob.get(w));
+						//	System.out.println(w + "\t freq \t" + currentFreq);
+							
 						}
 						else
+							//val_words_prob.put(w, 1.0);
 							val_words_prob.put(w, 1.0);
 						
 					}
+					
+					for(String w : val_words) {
+						current_prob = val_words_prob.get(w) / listLen;
+						val_words_prob.put(w, current_prob);
+					//	System.out.println(w + "\t prob \t" + current_prob);
+						
+					}
+					//System.out.println(val_words_prob);
 					secondWords_stats.put(key_x, val_words_prob);
 				}
 				
@@ -194,7 +209,7 @@ public class MainClass {
 					List<String> val_words = new ArrayList<String>();
 					
 					val_words = transitions.get(key_y);
-					int listLen = val_words.size();
+					double listLen = val_words.size();
 					
 					//transitions_stats HashMap vals: <second words, probabilities>
 					HashMap<String, Double> val_words_prob = new HashMap<String, Double>();
@@ -203,13 +218,14 @@ public class MainClass {
 						
 						if(val_words_prob.containsKey(w)) {
 							current_prob = val_words_prob.get(w) + ( 1 / listLen );
-							current_prob = current_prob + ( 1 / listLen );
+						//	current_prob = current_prob + ( 1 / listLen );
 							val_words_prob.put(w, current_prob);	
 						}
 						else
 							val_words_prob.put(w, 1.0);
 						
 					}
+					
 					transitions_stats.put(key_y, val_words_prob);
 				}
 				
@@ -223,6 +239,7 @@ public class MainClass {
 					String word_two = "";
 				
 					double seed = Math.random();
+					
 					double x = 0.0;
 					for(String firsts: firstWords.keySet()) {
 						
@@ -239,12 +256,20 @@ public class MainClass {
 						
 					
 					}//first word generated
+					
+					
+					
 					HashMap<String, Double> val = secondWords_stats.get(word_one);
 					seed = Math.random();
 					x = 0.0;
+					String temp_word_two = "";
+					//int size = 0; //compare to size of hashmap 
 					for(String seconds: val.keySet()) {
+						temp_word_two = seconds;
 						Double value = val.get(seconds);
 						x = x+value;
+					//	System.out.println("seconds\t" + seconds + "\tseed"+ seed +"\t+x"+x);
+						
 						if(seed < x) {
 							sentence = sentence + " " + seconds + " ";
 							word_two = seconds;
@@ -252,7 +277,36 @@ public class MainClass {
 							writer3.print(word_two + "* ");
 							break;
 						}
-					}//second word generated
+						//size++;
+					}
+					
+					if(word_two == "") {
+						
+						word_two = temp_word_two;
+						sentence = sentence + " " + word_two + " ";
+					}
+			/*		HashMap<String, Double> val = secondWords_stats.get(word_one);
+					
+					seed = Math.random();
+					
+					x = 0.0;
+					for(String seconds: val.keySet()) {
+						//HashMap<String, Double> values_hash = secondWords_stats.get(seconds);
+						for(String next: val.keySet()) {
+						//	List<Double> val_words = new ArrayList<Double>();
+							val_words = val.get(seconds);
+							x = x+value;
+						//	System.out.println(seconds + "\t" +value);
+								if(seed < x) {
+							
+									sentence = sentence + " " + seconds + " ";
+									word_two = seconds;
+									
+									writer3.print(word_two + "* ");
+									break;
+								}
+			*/			//}*********************************8
+					//}//second word generated
 					
 					String word_pair = word_one + "_" + word_two;
 					String previous = word_two;
@@ -262,6 +316,7 @@ public class MainClass {
 						seed = Math.random();
 						x = 0.0;
 						for(String trans: val_trans.keySet()) {
+					//		System.out.println("trans\t" + trans);
 							Double value = val_trans.get(trans);
 							x = x+value;
 							if(seed < x) {
