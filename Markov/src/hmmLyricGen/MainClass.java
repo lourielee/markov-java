@@ -126,6 +126,7 @@ public class MainClass {
 				count++;
 			}
 		}
+		PrintWriter out = new PrintWriter("output.txt", "UTF-8");
 		
 		PrintWriter writer = new PrintWriter("check_seconds.txt", "UTF-8");
 		for(Map.Entry<String, List<String>> entry : secondWords.entrySet()) {
@@ -154,14 +155,16 @@ public class MainClass {
 		
 		
 			
-		//normalize firstWords<>
-				
 		
+				
+		//normalize firstWords:
 				for(String key_x: firstWords.keySet()) {
 					firstWords.put(key_x, firstWords.get(key_x)/firstWord_count);
 					
 				}
 				
+		//normalize second words:
+				double currentFreq = 0;
 				HashMap<String, HashMap<String, Double>> secondWords_stats = new HashMap<String, HashMap<String, Double>>();
 				for(String key_x: secondWords.keySet()) {
 					
@@ -174,35 +177,31 @@ public class MainClass {
 					double current_prob = 0;
 					for(String w : val_words) {
 						
-						if(val_words_prob.containsKey(w)) {
-							//current_prob = val_words_prob.get(w) + ( 1 / listLen );
-							//current_prob = current_prob + ( 1 / listLen );
-							//val_words_prob.put(w, current_prob);	
+						if(!val_words_prob.containsKey(w))
+							val_words_prob.put(w, 1.0);
+						else {
 							
-							
-							double currentFreq = val_words_prob.get(w);
-							val_words_prob.put(w, currentFreq+1);	
-						//	System.out.println(w + "\t*" + val_words_prob.get(w));
-						//	System.out.println(w + "\t freq \t" + currentFreq);
+							currentFreq = val_words_prob.get(w) + 1;
+							val_words_prob.put(w, currentFreq);	//word counts following second word
+						
 							
 						}
-						else
-							//val_words_prob.put(w, 1.0);
-							val_words_prob.put(w, 1.0);
 						
 					}
 					
-					for(String w : val_words) {
-						current_prob = val_words_prob.get(w) / listLen;
-						val_words_prob.put(w, current_prob);
-					//	System.out.println(w + "\t prob \t" + current_prob);
+					for(String key_w : val_words_prob.keySet()) {
+						current_prob = val_words_prob.get(key_w) / listLen;
+						val_words_prob.put(key_w, current_prob);
+			
 						
 					}
-					//System.out.println(val_words_prob);
+			
+					
 					secondWords_stats.put(key_x, val_words_prob);
 				}
 				
-				//transitions
+		//normalize transitions:
+				currentFreq = 0;
 				HashMap<String, HashMap<String, Double>> transitions_stats = new HashMap<String, HashMap<String, Double>>();
 				for(String key_y: transitions.keySet()) {
 					
@@ -216,15 +215,23 @@ public class MainClass {
 					double current_prob = 0;
 					for(String w : val_words) {
 						
-						if(val_words_prob.containsKey(w)) {
-							current_prob = val_words_prob.get(w) + ( 1 / listLen );
-						//	current_prob = current_prob + ( 1 / listLen );
-							val_words_prob.put(w, current_prob);	
-						}
-						else
+						if(!val_words_prob.containsKey(w))
 							val_words_prob.put(w, 1.0);
+							
+						else {
+								currentFreq = val_words_prob.get(w) + 1;
+								val_words_prob.put(w, currentFreq);	//word counts following second word
+							}
+						
 						
 					}
+					for(String key_w : val_words_prob.keySet()) {
+						current_prob = val_words_prob.get(key_w) / listLen;
+						val_words_prob.put(key_w, current_prob);
+						//System.out.println(key_w+ "\t->\t"+key_w + "\t prob \t" + current_prob);
+						//System.out.println(val_words_prob.size());
+					}
+					
 					
 					transitions_stats.put(key_y, val_words_prob);
 				}
@@ -263,21 +270,22 @@ public class MainClass {
 					seed = Math.random();
 					x = 0.0;
 					String temp_word_two = "";
-					//int size = 0; //compare to size of hashmap 
+				
 					for(String seconds: val.keySet()) {
 						temp_word_two = seconds;
 						Double value = val.get(seconds);
 						x = x+value;
-					//	System.out.println("seconds\t" + seconds + "\tseed"+ seed +"\t+x"+x);
+						
 						
 						if(seed < x) {
+						
 							sentence = sentence + " " + seconds + " ";
 							word_two = seconds;
 						
 							writer3.print(word_two + "* ");
 							break;
 						}
-						//size++;
+						
 					}
 					
 					if(word_two == "") {
@@ -285,27 +293,7 @@ public class MainClass {
 						word_two = temp_word_two;
 						sentence = sentence + " " + word_two + " ";
 					}
-			/*		HashMap<String, Double> val = secondWords_stats.get(word_one);
-					
-					seed = Math.random();
-					
-					x = 0.0;
-					for(String seconds: val.keySet()) {
-						//HashMap<String, Double> values_hash = secondWords_stats.get(seconds);
-						for(String next: val.keySet()) {
-						//	List<Double> val_words = new ArrayList<Double>();
-							val_words = val.get(seconds);
-							x = x+value;
-						//	System.out.println(seconds + "\t" +value);
-								if(seed < x) {
-							
-									sentence = sentence + " " + seconds + " ";
-									word_two = seconds;
-									
-									writer3.print(word_two + "* ");
-									break;
-								}
-			*/			//}*********************************8
+			
 					//}//second word generated
 					
 					String word_pair = word_one + "_" + word_two;
@@ -316,25 +304,29 @@ public class MainClass {
 						seed = Math.random();
 						x = 0.0;
 						for(String trans: val_trans.keySet()) {
-					//		System.out.println("trans\t" + trans);
+						
 							Double value = val_trans.get(trans);
 							x = x+value;
+						
 							if(seed < x) {
+						
 								sentence = sentence + " " + trans + " ";
 								next = trans;
 								writer3.print(next + "+ ");
 								break;
 							}
-						}//second word generated
+						}//next word generated
 						word_pair = word_two + "_" + next;
 						word_two = next;
 						
 					}while(word_two != ".");
 					writer3.println("");
 				System.out.println(sentence);
+					out.println(sentence);
 				
 				}
 				writer3.close();
+				out.close();
 		
 				
 				
