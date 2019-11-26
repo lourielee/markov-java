@@ -126,36 +126,11 @@ public class MainClass {
 				count++;
 			}
 		}
-		PrintWriter out = new PrintWriter("output.txt", "UTF-8");
 		
-		PrintWriter writer = new PrintWriter("check_seconds.txt", "UTF-8");
-		for(Map.Entry<String, List<String>> entry : secondWords.entrySet()) {
-			String key = entry.getKey().toString();
-			List<String> val = secondWords.get(key);
-			writer.println("\n");
-			writer.print(key + ": \t");
-			for(String strVal:val) {
-				writer.print(strVal + "\t");
-			}
-		}
-		writer.close();
-		
-		PrintWriter writer2 = new PrintWriter("check_trans.txt", "UTF-8");
-		for(Map.Entry<String, List<String>> entry2 : transitions.entrySet()) {
-			String key2 = entry2.getKey().toString();
-			List<String> val2 = transitions.get(key2);
-			writer2.println("\n");
-			writer2.print(key2 + ": \t");
-			for(String strVal2:val2) {
-				writer2.print(strVal2 + "\t");
-			}
-		}
-		writer2.close();
-		
-		
-		
-			
-		
+		// print to file, visualize data cohesively in the hashes; gives idea of quality of input file in generating novel outputs: 
+		PrintToFile.printHash(secondWords, "check_seconds");
+		PrintToFile.printHash(transitions, "check_transitions");
+	
 				
 		//normalize firstWords:
 				for(String key_x: firstWords.keySet()) {
@@ -237,7 +212,9 @@ public class MainClass {
 				}
 				
 	
-				PrintWriter writer3 = new PrintWriter("sentence.txt", "UTF-8");
+				
+				PrintWriter out = new PrintWriter("output.txt", "UTF-8");
+				
 				//generate text using model:
 				
 				for(int i = 0; i < 10; i++) {
@@ -257,14 +234,12 @@ public class MainClass {
 							sentence = firsts + " ";
 							word_one = firsts;
 						
-							writer3.print(word_one + "^ ");
+							
 							break;
 						}
 						
 					
 					}//first word generated
-					
-					
 					
 					HashMap<String, Double> val = secondWords_stats.get(word_one);
 					seed = Math.random();
@@ -282,7 +257,7 @@ public class MainClass {
 							sentence = sentence + " " + seconds + " ";
 							word_two = seconds;
 						
-							writer3.print(word_two + "* ");
+							
 							break;
 						}
 						
@@ -312,7 +287,7 @@ public class MainClass {
 						
 								sentence = sentence + " " + trans + " ";
 								next = trans;
-								writer3.print(next + "+ ");
+								
 								break;
 							}
 						}//next word generated
@@ -320,18 +295,13 @@ public class MainClass {
 						word_two = next;
 						
 					}while(word_two != ".");
-					writer3.println("");
+					
 				System.out.println(sentence);
 					out.println(sentence);
 				
 				}
-				writer3.close();
+				
 				out.close();
-		
-				
-				
-				
-		
 		
 	}
 
