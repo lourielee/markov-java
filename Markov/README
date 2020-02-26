@@ -1,10 +1,9 @@
-markov-java project: poem generator 
+markov-java project: Poem Generator 
 
-Hidden Markov Model second-order: frequency of word pairs describes probability of possible next words, then chosen by comparing probability to random number. 
+Hidden Markov Model (second-order): Frequency of word pairs describes probability of possible next words, then chosen by comparing probability to random number. 
 
-Input file: text file containing various song lyrics, differnt genres for diversity. 
+Input file: A text file containing lines of sentence snippets, song lyrics in this case with differnt genres for diversity. 
 
-A longer input file generates "better" results (less repetitive output, more instances of unique outputs compared to the input file).
+Output: Generates 10 lines of a new poem/nursery rhyme.
 
-
-Output: generates 10 lines of a new poem/nursery rhyme
+NOTE: A longer input file with more unique snippets generates "better" results with less repetitive output.
